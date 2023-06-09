@@ -1,6 +1,5 @@
 export class RequestBatch {
   batch: Map<number, Promise<{ id: number; response: Response }>> = new Map();
-  abortController: AbortController = new AbortController();
 
   private currentId = 0;
   private getId() {
@@ -15,51 +14,11 @@ export class RequestBatch {
       headers: {
         "Content-Type": "text/html",
       },
-      signal: this.abortController.signal,
     });
-    this.batch.set(
-      id,
-      fetch(request).then(response => ({ id, response }))
-    );
+    // TODO: implement!
   }
 
-  async pull(): Promise<Response | null> {
-    if (this.batch.size === 0) {
-      return null;
-    }
-    const { response, id } = await Promise.race(this.batch.values());
-    this.batch.delete(id);
-    return response;
-  }
-
-  [Symbol.asyncIterator](): AsyncIterator<Response, number> {
-    return {
-      next: async () => {
-        const response = await this.pull();
-        if (response === null) {
-          return {
-            done: true,
-            value: 0,
-          };
-        }
-        return {
-          done: false,
-          value: response,
-        };
-      },
-      return: async () => {
-        if (this.batch.size > 0) {
-          this.abortController.abort();
-        }
-        this.batch = new Map();
-        this.currentId = 0;
-        return {
-          done: true,
-          value: this.batch.size,
-        };
-      },
-    };
-  }
+  // TODO: implement pull
 }
 
 const batch = new RequestBatch();
@@ -69,13 +28,12 @@ const batch = new RequestBatch();
   "https://nanogiants.de/",
 ].forEach(url => batch.push(url));
 
-for await (const res of batch) {
-  const text = await res.text();
-  const formattedResult = `
-    ${res.url}: Status ${res.status}
-    ${text.slice(0, 140)}
-    ...
+const formatResponse = async (response: Response): Promise<string> => {
+  const text = await response.text();
+  return `
+${response.url}: Status ${response.status}
 
-  `;
-  console.log(formattedResult);
-}
+${text.slice(0, 140)}
+...
+`;
+};
