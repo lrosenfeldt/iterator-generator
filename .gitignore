@@ -1,0 +1,12 @@
+# MacOS
+.DS_Store
+
+###########################################
+# Javascript / Typescript / Node / Nodejs #
+###########################################
+node_modules
+# Typescript build output
+*.tsbuildinfo
+.build
+# Output data for js/packages/ode
+js/packages/ode/.data
