@@ -30,8 +30,8 @@ class RocketCountdown implements Iterable<number> {
 function* bar(): Generator<string | number, void, undefined> {
   const alphabet = ["a", "b", "c"];
   // iterable, iterator or generator
-  yield* alphabet;
-  // yield* new RocketCountdown();
+  // yield* alphabet;
+  yield* new RocketCountdown();
 }
 
 for (const value of bar()) {
